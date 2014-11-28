@@ -8,19 +8,17 @@ generate a set of audit files and folders for the [TOSAudit API](https://docs.go
 
 
 
-DEPENDENCIES
-============
+Dependencies
+------------
 
 This is a list of dependencies external to ruby and the ruby GEMs used for the project.
 
-prettify
---------
+### prettify
 Prettify is a python script used to simplify the HTML code extracted from the TOSBack2 git repository.
 https://github.com/subsystem7/prettify
 
 
-xidel
------
+### xidel
 "Xidel is a command line tool to download and extract data from html/xml pages."  It is used in this project to
 extract a portion of an HTML source document that contains the most relevant policy text. When a xidel template is
 specified for a specific TOSBack2 policy document, it is run before prettify. This process usually makes the comparison
