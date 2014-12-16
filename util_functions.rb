@@ -1,4 +1,5 @@
 require_relative 'defaults'
+require 'time'
 
 #
 # (one interesting) usage: File.write!($base_properties, File.readlines($base_properties).sort.join)
@@ -10,13 +11,22 @@ class String
   def is_integer?
     !!(self =~ /^[-+]?[0-9]+$/)
   end
+  def t_time_f_audit_file_name
+    Time.parse(self)
+  end
 end
 
-
-
-def time_from_seconds(seconds)
-  (nil != seconds && seconds.is_integer?) ? Time.at(seconds.to_i) : nil
+class Time
+  # 20120415T115659-0400
+  def t_audit_file_name
+    #to_i.to_s
+    self.strftime('%Y%m%dT%H%M%S%z')
+  end
 end
+
+#def time_from_seconds(seconds)
+#  (nil != seconds && seconds.is_integer?) ? Time.at(seconds.to_i) : nil
+#end
 
 # This method opens a file that should contain a
 # string representing a seconds time value
@@ -24,7 +34,7 @@ def get_time_from_file_type_latest(file_path)
   time = nil
   if(File.exists?(file_path)) then
     latest_file = File.open(file_path)
-    time = time_from_seconds(latest_file.gets)
+    time = latest_file.gets.t_time_f_audit_file_name #time_from_seconds(latest_file.gets)
     # log( (nil!=time ? time.asctime : 'no time') )
     latest_file.close
   end

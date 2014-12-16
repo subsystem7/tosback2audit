@@ -8,14 +8,14 @@ def run
 
 
   live = true
-  redo_all = false
+  redo_all = true
 
   # running a single
-  a = Analyzer.new('addictinggames.com.xml', live, redo_all)
+  #a = Analyzer.new('addictinggames.com.xml', live, redo_all)
   #a = Analyzer.new('app.net.xml', live, redo_all)
 
   # run all
-
+  a = Analyzer.new(nil,live,redo_all)
 
 
   # amazon_Kindle_License_Agreement_and_Terms_of_Use.xml :

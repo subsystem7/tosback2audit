@@ -93,7 +93,7 @@ class TOSSiteDocument
           index_xml = Nokogiri::XML::Builder.new do |xml|
             xml.Policies {
               @rule_docs.each { |doc|
-                xml.Policy(:type => doc.type, :folder => doc.doc_folder_name, :name => doc.name, :url => doc.url_name, :latest => $A_LONG_LONG_TIME_AGO.to_i.to_s)
+                xml.Policy(:type => doc.type, :folder => doc.doc_folder_name, :name => doc.name, :url => doc.url_name, :latest => $A_LONG_LONG_TIME_AGO.t_audit_file_name)
               }
             }
           end
@@ -116,7 +116,7 @@ class TOSSiteDocument
             policy['folder'] =doc.doc_folder_name
             policy['name'] = doc.name
             policy['url'] = doc.url_name
-            policy['latest'] = $A_LONG_LONG_TIME_AGO.to_i.to_s
+            policy['latest'] = $A_LONG_LONG_TIME_AGO.t_audit_file_name
             policies = xml.at_xpath('/Policies')
             policies.add_child(policy)
             File.write!("#{@site_folder}index.xml", xml)
@@ -246,7 +246,7 @@ class TOSRuleDocument
         # Check for the latest run time
         if !redo_all && File.exists?(latestref_path)
           latestref_file = File.open(latestref_path)
-          latestref_value = time_from_seconds(latestref_file.gets)
+          latestref_value = latestref_file.gets.t_time_f_audit_file_name  #time_from_seconds(latestref_file.gets)
           if latestref_value.nil? then
             latestref_value = $A_LONG_LONG_TIME_AGO
             log('invalid latestref_value') if $DEBUG_MODE
@@ -261,13 +261,15 @@ class TOSRuleDocument
         # runs through the commits for the TOS file and outputs any committed files that
         # have a greater date than the run_as_of variable
         commit_array.reverse_each { |commit|
-          if latestref_value < commit.date.to_time && !File.exists?("#{@snapshots_folder}#{commit.date.to_i.to_s}.ignore") then
+          if latestref_value < commit.date.to_time && !File.exists?("#{@snapshots_folder}#{commit.date.t_audit_file_name}.ignore") then
 
             data = subtree_data(commit, @repo_tree_path)
 
             if(!data.nil?) then
 
-              File.write!("#{@snapshots_folder}#{commit.date.to_i.to_s}.raw", data)
+              #File.write!("#{@snapshots_folder}#{commit.date.t_audit_file_name}.raw", data)
+
+              File.write!("#{@snapshots_folder}#{commit.date.t_audit_file_name}.raw", data)
 
               # At this point, any custom extraction/cleanup of the raw file need to be executed before
               # beautiful soup is used to prettify the HTML
@@ -279,15 +281,15 @@ class TOSRuleDocument
               #   <Command><![CDATA[<div id="footerPageContent">{.}</div>]]></Command>
               # </ProcessingRule>
               #
-              if File.exists?("#{@snapshots_folder}#{commit.date.to_i.to_s}.processingrules.xml")
-                processing_rules = Nokogiri::XML(File.read("#{@snapshots_folder}#{commit.date.to_i.to_s}.processingrules.xml"))
+              if File.exists?("#{@snapshots_folder}#{commit.date.t_audit_file_name}.processingrules.xml")
+                processing_rules = Nokogiri::XML(File.read("#{@snapshots_folder}#{commit.date.t_audit_file_name}.processingrules.xml"))
               end
 
-              cmd = "cat #{@snapshots_folder}#{commit.date.to_i.to_s}.raw"
+              cmd = "cat \"#{@snapshots_folder}#{commit.date.t_audit_file_name}.raw\""
 
               if(!processing_rules.nil?) then
                 command_element = processing_rules.at_xpath('/ProcessingRule/Command')
-                cmd = "#{$xidel} #{@snapshots_folder}#{commit.date.to_i.to_s}.raw -e '#{command_element.text}' --output-format html"
+                cmd = "#{$xidel} \"#{@snapshots_folder}#{commit.date.t_audit_file_name}.raw\" -e '#{command_element.text}' --output-format html"
               end
 
               cmd << " | python #{$prettify}"
@@ -295,14 +297,14 @@ class TOSRuleDocument
               ## log("#{cmd}")
 
               pretty = %x[ #{cmd} ]
-              File.write!("#{@snapshots_folder}#{commit.date.to_i.to_s}", pretty)
+              File.write!("#{@snapshots_folder}#{commit.date.t_audit_file_name}", pretty)
 
-              ## log("Writing #{@snapshots_folder}#{commit.date.to_i.to_s}") if $DEBUG_MODE
-              @latest_update = commit.date.to_i.to_s
+              ## log("Writing #{@snapshots_folder}#{commit.date.t_audit_file_name}") if $DEBUG_MODE
+              @latest_update = commit.date.t_audit_file_name
               latest_commit = commit
               @updated = true
             else
-              log("Data from commit #{commit.date.to_i.to_s} of site  #{@site_doc.site_name} #{@name} was nil.")
+              log("Data from commit #{commit.date.t_audit_file_name} of site  #{@site_doc.site_name} #{@name} was nil.")
             end
           end
         }
@@ -310,14 +312,14 @@ class TOSRuleDocument
         if !latest_commit.nil? then
 
             # LATEST RAW HTML
-            FileUtils.copy("#{@snapshots_folder}#{latest_commit.date.to_i.to_s}.raw", "#{@content_folder}latest.raw")
+            FileUtils.copy("#{@snapshots_folder}#{latest_commit.date.t_audit_file_name}.raw", "#{@content_folder}latest.raw")
 
             # LATEST PRETTY HTML
-            FileUtils.copy("#{@snapshots_folder}#{latest_commit.date.to_i.to_s}", "#{@content_folder}latest")
+            FileUtils.copy("#{@snapshots_folder}#{latest_commit.date.t_audit_file_name}", "#{@content_folder}latest")
 
             # LATEST REFERENCE FILE
             # content folder / latestref    - reference to the file in snapshots that is the latest one
-            File.write!(latestref_path, "#{latest_commit.date.to_i.to_s}")
+            File.write!(latestref_path, "#{latest_commit.date.t_audit_file_name}")
 
             # Open the index.xml file, and set the latest version attribute
             xml = Nokogiri::XML(File.read("#{@site_doc.site_folder}index.xml"))
@@ -373,7 +375,7 @@ class TOSRuleDocument
     end
 
     if tree_sub_object.nil?
-      log("no data for commit #{commit.date.to_i.to_s} for #{sub_obj}")
+      log("no data for commit #{commit.date.t_audit_file_name} for #{sub_obj}")
     else
       data = tree_sub_object.data
     end

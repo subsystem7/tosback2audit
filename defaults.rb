@@ -26,7 +26,7 @@ $xidel = '/Users/asa/Documents/Clients/ISOC/TOSBack2/xidel'
 
 ##
 # Path to prettify
-$prettify = '/Users/asa/Documents/Clients/ISOC/TOSBack2/prettify.py'
+$prettify = '/Users/asa/Documents/Clients/ISOC/TOSBack2/prettify/prettify.py'
 
 
 

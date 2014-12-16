@@ -57,15 +57,18 @@ class Analyzer
     current_commit = @repo.head.commit
     log('Latest Commit Date: ' + current_commit.committed_date.asctime + '\n' ) if $DEBUG_MODE
 
+
+    #log('test2 ' + current_commit.committed_date.t_audit_file_name.t_time_f_audit_file_name.asctime+'\n' )
+
     # create the latestcheck file at the root of the API directory
     latestcheckfile = File.new("#{audit_base_path(@is_live)}latestcheck", 'w')
-    latestcheckfile.write(current_commit.committed_date.to_i.to_s)
+    latestcheckfile.write(current_commit.committed_date.t_audit_file_name)
     latestcheckfile.close
 
     # Check for the latest run time
     if File.exists?("#{audit_base_path(@is_live)}latestcheck")
       latestcheckfile = File.open("#{audit_base_path(@is_live)}latestcheck")
-      time = time_from_seconds(latestcheckfile.gets)
+      time = latestcheckfile.gets.t_time_f_audit_file_name #time_from_seconds(latestcheckfile.gets)
       log( (nil!=time ? time.asctime : 'no time') )
       latestcheckfile.close
     end
@@ -96,15 +99,15 @@ class Analyzer
 
       # update the change log
       if @updated_snapshots.count > 0 then
-        File.write!("#{audit_changelog_snapshots_folder_path(@is_live)}#{now.to_i.to_s}", @updated_snapshots.join("\n"))
-        File.write!("#{audit_changelog_folder_path(@is_live)}latest", "#{now.to_i.to_s}")
+        File.write!("#{audit_changelog_snapshots_folder_path(@is_live)}#{now.t_audit_file_name}", @updated_snapshots.join("\n"))
+        File.write!("#{audit_changelog_folder_path(@is_live)}latest", "#{now.t_audit_file_name}")
       end
 
       # do the book keeping around the index snapshots
-      if(File.exists?("#{audit_host_index_folder_path(@is_live)}latest")) then
+      if(File.exists?("#{audit_host_index_folder_path(@is_live)}latestref")) then
         # Here we test whether anything has changed and if it has, we write a new snapshot file
-        previous_latest = get_time_from_file_type_latest("#{audit_host_index_folder_path(@is_live)}latest")
-        if(nil != previous_latest && FileUtils.compare_file("#{audit_host_index_snapshots_folder_path(@is_live)}_tmp", "#{audit_host_index_snapshots_folder_path(@is_live)}#{previous_latest.to_i.to_s}")) then
+        previous_latest = get_time_from_file_type_latest("#{audit_host_index_folder_path(@is_live)}latestref")
+        if(nil != previous_latest && FileUtils.compare_file("#{audit_host_index_snapshots_folder_path(@is_live)}_tmp", "#{audit_host_index_snapshots_folder_path(@is_live)}#{previous_latest.t_audit_file_name}")) then
           log('they are the same') if $DEBUG_MODE
           # unlink the temporary file
           File.delete("#{audit_host_index_snapshots_folder_path(@is_live)}_tmp")
@@ -113,22 +116,22 @@ class Analyzer
 
           # create a new 'latestref' file and rename the snapshot
           latestindexfile = File.new("#{audit_host_index_folder_path(@is_live)}latestref", 'w')
-          latestindexfile.write(now.to_i.to_s)
+          latestindexfile.write(now.t_audit_file_name)
           latestindexfile.close
 
           # move the index_file to the latest
-          File.rename("#{audit_host_index_snapshots_folder_path(@is_live)}_tmp", "#{audit_host_index_snapshots_folder_path(@is_live)}#{now.to_i.to_s}")
-          FileUtils.copy("#{audit_host_index_snapshots_folder_path(@is_live)}#{now.to_i.to_s}", "#{audit_host_index_folder_path(@is_live)}latest")
+          File.rename("#{audit_host_index_snapshots_folder_path(@is_live)}_tmp", "#{audit_host_index_snapshots_folder_path(@is_live)}#{now.t_audit_file_name}")
+          FileUtils.copy("#{audit_host_index_snapshots_folder_path(@is_live)}#{now.t_audit_file_name}", "#{audit_host_index_folder_path(@is_live)}latest")
         end
       else
         # This is the case where there is no "latest" file.  The very first snapshot and latest are created
         latestindexfile = File.new("#{audit_host_index_folder_path(@is_live)}latestref", 'w')
-        latestindexfile.write(now.to_i.to_s)
+        latestindexfile.write(now.t_audit_file_name)
         latestindexfile.close
 
         # move the index_file to the latest
-        File.rename("#{audit_host_index_snapshots_folder_path(@is_live)}_tmp", "#{audit_host_index_snapshots_folder_path(@is_live)}#{now.to_i.to_s}")
-        FileUtils.copy("#{audit_host_index_snapshots_folder_path(@is_live)}#{now.to_i.to_s}", "#{audit_host_index_folder_path(@is_live)}latest")
+        File.rename("#{audit_host_index_snapshots_folder_path(@is_live)}_tmp", "#{audit_host_index_snapshots_folder_path(@is_live)}#{now.t_audit_file_name}")
+        FileUtils.copy("#{audit_host_index_snapshots_folder_path(@is_live)}#{now.t_audit_file_name}", "#{audit_host_index_folder_path(@is_live)}latest")
       end
 
     end # Dir.chdir
